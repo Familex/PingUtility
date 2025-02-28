@@ -1,0 +1,16 @@
+# whitelist gitignore
+/*
+!.gitignore
+
+!/lib/
+
+!.metadata
+!analysis_options.yaml
+!pubspec.yaml
+!pubspec.lock
+!/android/
+!/linux/
+!/web/
+!/test/
+
+*.iml

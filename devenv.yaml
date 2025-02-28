@@ -1,0 +1,7 @@
+# for Android Studio and etc.
+allowUnfree: true
+
+# Android Studio works only on devenv's nixpkgs
+inputs:
+  nixpkgs:
+    url: "github:cachix/devenv-nixpkgs/rolling"

@@ -1,0 +1,14 @@
+# whitelist gitignore
+/*
+!.gitignore
+
+# sources
+!/src/
+
+# dev environment
+!flake.nix
+!flake.lock
+!devenv.nix
+!devenv.lock
+!devenv.yaml
+!.envrc
