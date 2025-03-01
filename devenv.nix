@@ -12,7 +12,14 @@
     };
   };
 
-  scripts.run-android-studio.exec = ''
-    1> /dev/null 2> /dev/null android-studio & disown
-  '';
+  scripts = {
+    run-android-studio.exec = ''
+      1> /dev/null 2> /dev/null android-studio "$DEVENV_ROOT" & disown
+    '';
+
+    adb-restart.exec = ''
+      adb kill-server
+      adb start-server
+    '';
+  };
 }
