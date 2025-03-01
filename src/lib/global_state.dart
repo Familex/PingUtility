@@ -1,12 +1,15 @@
 import 'package:dart_ping/dart_ping.dart';
 import 'package:flutter/widgets.dart';
 
+const timeoutMs = 3000;
+const pingHistoryMax = 100;
+
 // store host ip or dns name
 final class Host {
   Host(this.name);
 
   final String name;
-  Duration? time;
+  List<Duration?> time = [];
 }
 
 final class GlobalState extends ChangeNotifier {
@@ -32,8 +35,13 @@ final class GlobalState extends ChangeNotifier {
     var ping = Ping(host.name, count: null, interval: 1);
     hosts[host.name] = (ping, host);
     ping.stream.listen((event) {
-      host.time = event.response?.time;
-      notifyListeners();
+      if (event.response != null) {
+        host.time.add(event.response!.time);
+        if (host.time.length > pingHistoryMax) {
+          host.time.removeAt(0);
+        }
+        notifyListeners();
+      }
     });
     notifyListeners();
   }
