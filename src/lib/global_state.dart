@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 
 const timeoutMs = 3000;
 const pingHistoryMax = 100;
+const smallGraphElements = 20;
 
 // store host ip or dns name
 final class Host {
@@ -13,8 +14,12 @@ final class Host {
 }
 
 final class GlobalState extends ChangeNotifier {
-  // FIXME temporary
   GlobalState() {
+    addHost(Host('localhost'));
+    addHost(Host('127.0.0.1'));
+    addHost(Host('1.1.1.1'));
+    addHost(Host('google.com'));
+    // FIXME temporary
     addHost(Host('38.0.101.76'));
     addHost(Host('89.0.142.86'));
     addHost(Host('237.84.2.178'));
@@ -22,14 +27,13 @@ final class GlobalState extends ChangeNotifier {
     addHost(Host('10.8.0.1'));
     addHost(Host('192.168.0.1'));
     addHost(Host('89.207.132.170'));
-    addHost(Host('google.com'));
-    addHost(Host('1.1.1.1'));
-    addHost(Host('localhost'));
-    addHost(Host('127.0.0.1'));
-    addHost(Host('amogus'));
+    addHost(Host('INVALID'));
   }
 
   final Map<String, (Ping, Host)> hosts = {};
+
+  Iterable<Duration?> getGraphDataReversed(String hostName) =>
+      hosts[hostName]?.$2.time.reversed.take(smallGraphElements) ?? [];
 
   void addHost(Host host) {
     var ping = Ping(host.name, count: null, interval: 1);
