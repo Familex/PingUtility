@@ -20,6 +20,7 @@ final class GlobalState extends ChangeNotifier {
     addHost(Host('192.168.0.1'));
     addHost(Host('89.207.132.170'));
     addHost(Host('google.com'));
+    addHost(Host('1.1.1.1'));
     addHost(Host('localhost'));
     addHost(Host('127.0.0.1'));
     addHost(Host('amogus'));

@@ -11,21 +11,41 @@ class HostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var state = context.watch<GlobalState>();
+    var ms = state.hosts[name]?.$2.time?.inMilliseconds;
 
     return Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, // move to the left
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(name),
-          ),
-          const Spacer(),
-          Checkbox(
-            value: state.hosts[name]?.$2.time != null,
-            onChanged: null,
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start, // move to the left
+          children: [
+            Text(
+              name,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const Spacer(),
+            Row(
+              children: ms != null
+                  ? [
+                      const Spacer(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text('$ms ms'),
+                      ),
+                      const Icon(Icons.check, color: Colors.green),
+                    ]
+                  : [
+                      const Spacer(),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8.0),
+                        child:
+                            Text('N/A', style: TextStyle(color: Colors.grey)),
+                      ),
+                      const Icon(Icons.close, color: Colors.red),
+                    ],
+            )
+          ],
+        ),
       ),
     );
   }
