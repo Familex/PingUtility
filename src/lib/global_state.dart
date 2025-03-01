@@ -1,11 +1,19 @@
+import 'package:dart_ping/dart_ping.dart';
 import 'package:flutter/widgets.dart';
 
 // store host ip or dns name
 final class Host {
-  Host(this.name);
+  Host(this.name) {
+    _ping = Ping(name, count: null, interval: 10);
+    _ping?.stream.listen((event) {
+      event.response?.time != null ? up = true : up = false;
+    });
+  }
 
   final String name;
   bool up = false;
+
+  Ping? _ping;
 }
 
 final class GlobalState extends ChangeNotifier {
