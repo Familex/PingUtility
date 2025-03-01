@@ -3,32 +3,37 @@ import 'package:flutter/widgets.dart';
 
 // store host ip or dns name
 final class Host {
-  Host(this.name) {
-    _ping = Ping(name, count: null, interval: 10);
-    _ping?.stream.listen((event) {
-      event.response?.time != null ? up = true : up = false;
-    });
-  }
+  Host(this.name);
 
   final String name;
-  bool up = false;
-
-  Ping? _ping;
+  Duration? time;
 }
 
 final class GlobalState extends ChangeNotifier {
   // FIXME temporary
-  final Map<String, Host> hosts = {
-    '38.0.101.76': Host('38.0.101.76'),
-    '89.0.142.86': Host('89.0.142.86'),
-    '237.84.2.178': Host('237.84.2.178'),
-    '244.178.44.111': Host('244.178.44.111'),
-    '10.8.0.1': Host('10.8.0.1'),
-    '192.168.0.1': Host('192.168.0.1'),
-    '89.207.132.170': Host('89.207.132.170'),
-    'google.com': Host('google.com'),
-    'localhost': Host('localhost'),
-    '127.0.0.1': Host('127.0.0.1'),
-    'amogus': Host('amogus'),
-  };
+  GlobalState() {
+    addHost(Host('38.0.101.76'));
+    addHost(Host('89.0.142.86'));
+    addHost(Host('237.84.2.178'));
+    addHost(Host('244.178.44.111'));
+    addHost(Host('10.8.0.1'));
+    addHost(Host('192.168.0.1'));
+    addHost(Host('89.207.132.170'));
+    addHost(Host('google.com'));
+    addHost(Host('localhost'));
+    addHost(Host('127.0.0.1'));
+    addHost(Host('amogus'));
+  }
+
+  final Map<String, (Ping, Host)> hosts = {};
+
+  void addHost(Host host) {
+    var ping = Ping(host.name, count: null, interval: 1);
+    hosts[host.name] = (ping, host);
+    ping.stream.listen((event) {
+      host.time = event.response?.time;
+      notifyListeners();
+    });
+    notifyListeners();
+  }
 }

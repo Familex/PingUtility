@@ -22,7 +22,7 @@ class HostCard extends StatelessWidget {
           ),
           const Spacer(),
           Checkbox(
-            value: state.hosts[name]?.up,
+            value: state.hosts[name]?.$2.time != null,
             onChanged: null,
           ),
         ],
