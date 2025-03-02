@@ -1,17 +1,16 @@
 import 'package:dart_ping/dart_ping.dart';
 import 'package:flutter/material.dart';
 
-const timeoutMs = 3000;
-const pingHistoryMax = 100;
-const smallGraphElements = 20;
-
-// store host ip or dns name
-final class Host {
+class Host {
   Host(this.name);
 
   final String name;
   List<Duration?> time = [];
 }
+
+const timeoutMs = 3000;
+const pingHistoryMax = 100;
+const smallGraphElements = 20;
 
 final class GlobalState extends ChangeNotifier {
   GlobalState() {

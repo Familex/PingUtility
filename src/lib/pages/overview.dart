@@ -1,9 +1,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:ping_utility/pages/settings.dart';
 import 'package:provider/provider.dart';
 
 import '../global_state.dart';
-import 'settings.dart';
 
 class HostCard extends StatelessWidget {
   const HostCard({super.key, required this.name});
@@ -110,12 +110,13 @@ class OverviewPage extends StatelessWidget {
               ),
             ),
             IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => SettingsPage()),
-                  );
-                }),
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => SettingsPage()),
+                );
+              },
+            ),
           ],
         ),
       ),
