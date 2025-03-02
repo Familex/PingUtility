@@ -1,5 +1,5 @@
 import 'package:dart_ping/dart_ping.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 const timeoutMs = 3000;
 const pingHistoryMax = 100;

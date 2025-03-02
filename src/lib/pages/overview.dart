@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../global_state.dart';
+import 'settings.dart';
 
 class HostCard extends StatelessWidget {
   const HostCard({super.key, required this.name});
@@ -94,10 +95,10 @@ class OverviewPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.search),
-            Flexible(
+            const Icon(Icons.search),
+            const Flexible(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8.0),
                 child: TextField(
@@ -108,7 +109,13 @@ class OverviewPage extends StatelessWidget {
                 ),
               ),
             ),
-            IconButton(icon: Icon(Icons.settings), onPressed: null),
+            IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => SettingsPage()),
+                  );
+                }),
           ],
         ),
       ),
