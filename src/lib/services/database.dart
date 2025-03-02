@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../structs/settings.dart';
 
-class DatabaseService extends ChangeNotifier {
+class DatabaseService {
   // Singleton pattern
   static final DatabaseService _databaseService = DatabaseService._internal();
   factory DatabaseService() => _databaseService;
@@ -41,7 +40,6 @@ class DatabaseService extends ChangeNotifier {
   Future setInterval(int interval) async {
     var db = await _databaseService.database;
     await db.update('settings', {'interval': interval});
-    notifyListeners();
   }
 
   Future<Settings> getSettings() async {

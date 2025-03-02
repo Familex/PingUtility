@@ -1,5 +1,6 @@
 import 'package:dart_ping/dart_ping.dart';
 import 'package:flutter/material.dart';
+import 'package:ping_utility/services/database.dart';
 
 class Host {
   Host(this.name);
@@ -47,5 +48,16 @@ final class GlobalState extends ChangeNotifier {
       }
     });
     notifyListeners();
+  }
+
+  void restartPings() {
+    var db = DatabaseService();
+    var settings = db.getSettings();
+    settings.then((settings) {
+      var interval = settings.interval;
+      hosts.forEach((key, value) {
+        value = (Ping(key, interval: interval), value.$2);
+      });
+    });
   }
 }
