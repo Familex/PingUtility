@@ -13,17 +13,21 @@ class HostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var state = context.watch<HostsModel>();
-    var ms = () {
-      var result = 0.0;
-      var actualCount = 0;
-      for (var el in state.getGraphDataReversed(name)) {
-        if (el == null) continue;
-        result += el.inMilliseconds;
-        actualCount++;
+    var (min, avg, max) = () {
+      var data = state
+          .getGraphDataReversed(name)
+          .where((el) => el != null)
+          .map((el) => el!.inMilliseconds.toDouble());
+      if (data.isEmpty) return (null, null, null);
+      double total = 0.0;
+      double min = double.infinity;
+      double max = -double.infinity;
+      for (var el in data) {
+        if (el < min) min = el;
+        if (el > max) max = el;
+        total += el;
       }
-
-      if (actualCount == 0) return null;
-      return result / actualCount;
+      return (min, total / data.length, max);
     }();
 
     return Card(
@@ -40,6 +44,7 @@ class HostCard extends StatelessWidget {
                 child: ClipRect(
                     child: LineChart(LineChartData(
               lineTouchData: LineTouchData(enabled: false),
+              gridData: FlGridData(show: false),
               titlesData: FlTitlesData(show: false),
               lineBarsData: [
                 LineChartBarData(
@@ -59,24 +64,13 @@ class HostCard extends StatelessWidget {
               ],
             )))),
             Row(
-              children: ms != null
-                  ? [
-                      const Spacer(),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text('${ms.toStringAsFixed(2)} ms'),
-                      ),
-                      const Icon(Icons.check, color: Colors.green),
-                    ]
-                  : [
-                      const Spacer(),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.0),
-                        child:
-                            Text('N/A', style: TextStyle(color: Colors.grey)),
-                      ),
-                      const Icon(Icons.close, color: Colors.red),
-                    ],
+              children: [
+                const Spacer(),
+                (avg != null && min != null && max != null
+                    ? Text(
+                        '${min.toStringAsFixed(2)}/${avg.toStringAsFixed(2)}/${max.toStringAsFixed(2)} ms')
+                    : Text('N/A', style: TextStyle(color: Colors.grey))),
+              ],
             )
           ],
         ),

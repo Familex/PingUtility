@@ -16,6 +16,12 @@ class SettingsPage extends StatelessWidget {
     var settings = context.watch<Settings>();
     _intervalTEC.text = settings.interval.toString();
 
+    void updateInterval() {
+      var val = int.tryParse(_intervalTEC.text);
+      if (val == null) return;
+      settings.interval = val;
+    }
+
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -38,11 +44,7 @@ class SettingsPage extends StatelessWidget {
                     border: UnderlineInputBorder(),
                     labelText: 'Ping interval (seconds)',
                   ),
-                  onTapOutside: (_) {
-                    var val = int.tryParse(_intervalTEC.text);
-                    if (val == null) return;
-                    settings.interval = val;
-                  },
+                  onChanged: (_) => updateInterval(),
                 ),
               ),
             ),
