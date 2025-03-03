@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ping_utility/pages/settings.dart';
 import 'package:provider/provider.dart';
 
-import '../global_state.dart';
+import '../models/hosts.dart';
 
 class HostCard extends StatelessWidget {
   const HostCard({super.key, required this.name});
@@ -12,7 +12,7 @@ class HostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var state = context.watch<GlobalState>();
+    var state = context.watch<HostsModel>();
     var ms = () {
       var result = 0.0;
       var actualCount = 0;
@@ -90,7 +90,7 @@ class OverviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var state = context.watch<GlobalState>();
+    var state = context.watch<HostsModel>();
 
     return Scaffold(
       appBar: AppBar(

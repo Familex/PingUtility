@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'global_state.dart';
+import 'models/hosts.dart';
+import 'models/settings.dart';
 import 'pages/overview.dart';
+import 'services/database.dart';
 
-void main() {
+Settings settings = Settings(interval: -1);
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  settings = await DatabaseService().getSettings();
   runApp(const MainWindow());
 }
 
@@ -13,8 +19,20 @@ class MainWindow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => GlobalState(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => settings),
+        ChangeNotifierProxyProvider<Settings, HostsModel>(
+          create: (_) => HostsModel(),
+          update: (_, settings, hosts) {
+            if (hosts == null) {
+              throw ArgumentError.notNull('hosts');
+            }
+            hosts.settings = settings;
+            return hosts;
+          },
+        )
+      ],
       child: MaterialApp(
         title: 'Ping Utility',
         theme: ThemeData(

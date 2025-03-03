@@ -1,7 +1,7 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../structs/settings.dart';
+import '../models/settings.dart';
 
 class DatabaseService {
   // Singleton pattern
@@ -30,7 +30,7 @@ class DatabaseService {
 
   Future _onCreate(Database db, int version) async {
     await db.execute("create table settings(interval integer)");
-    await db.insert('settings', {'interval': 1000});
+    await db.insert('settings', {'interval': 1});
   }
 
   Future<Database> getDatabase() async {
