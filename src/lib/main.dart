@@ -6,6 +6,7 @@ import 'models/settings.dart';
 import 'pages/overview.dart';
 import 'services/database.dart';
 
+// XXX will be overwritten in main function
 Settings settings = Settings(interval: -1);
 
 void main() async {

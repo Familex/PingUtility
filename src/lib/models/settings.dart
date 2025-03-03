@@ -7,6 +7,7 @@ final class Settings extends ChangeNotifier {
   int get interval => _interval;
 
   set interval(int interval) {
+    if (_interval == interval) return;
     _interval = interval;
     notifyListeners();
   }

@@ -6,11 +6,15 @@ import 'package:provider/provider.dart';
 import '../models/settings.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+  SettingsPage({super.key});
+
+  // FIXME is it ok?
+  final TextEditingController _intervalTEC = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     var settings = context.watch<Settings>();
+    _intervalTEC.text = settings.interval.toString();
 
     return Scaffold(
         appBar: AppBar(
@@ -24,9 +28,7 @@ class SettingsPage extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                 child: TextField(
-                  controller: TextEditingController(
-                    text: settings.interval.toString(),
-                  ),
+                  controller: _intervalTEC,
                   keyboardType: TextInputType.number,
                   inputFormatters: <TextInputFormatter>[
                     NonEmptyFormatter(),
@@ -36,8 +38,8 @@ class SettingsPage extends StatelessWidget {
                     border: UnderlineInputBorder(),
                     labelText: 'Ping interval (seconds)',
                   ),
-                  onChanged: (value) {
-                    var val = int.tryParse(value);
+                  onTapOutside: (_) {
+                    var val = int.tryParse(_intervalTEC.text);
                     if (val == null) return;
                     settings.interval = val;
                   },
