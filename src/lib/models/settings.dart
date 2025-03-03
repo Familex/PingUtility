@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../services/database.dart';
+
 final class Settings extends ChangeNotifier {
   Settings({required int interval}) : _interval = interval;
 
@@ -10,5 +12,6 @@ final class Settings extends ChangeNotifier {
     if (_interval == interval) return;
     _interval = interval;
     notifyListeners();
+    DatabaseService().setInterval(interval);
   }
 }
