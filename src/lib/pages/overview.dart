@@ -51,6 +51,7 @@ class HostCard extends StatelessWidget {
                 LineChartBarData(
                   isCurved: true,
                   dotData: FlDotData(show: false),
+                  color: Theme.of(context).colorScheme.primary,
                   spots: () {
                     List<FlSpot> result = [];
                     var ind = smallGraphElements;
