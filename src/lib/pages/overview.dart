@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:fuzzy/fuzzy.dart';
 import 'package:ping_utility/pages/settings.dart';
 import 'package:provider/provider.dart';
 
@@ -79,12 +80,47 @@ class HostCard extends StatelessWidget {
   }
 }
 
-class OverviewPage extends StatelessWidget {
+class OverviewPage extends StatefulWidget {
   const OverviewPage({super.key});
+
+  @override
+  State<OverviewPage> createState() => _OverviewPageState();
+}
+
+class _OverviewPageState extends State<OverviewPage> {
+  final TextEditingController _searchTEC = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _searchTEC.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    setState(() {}); // Trigger rebuild to update filtered hosts
+  }
+
+  @override
+  void dispose() {
+    _searchTEC.removeListener(_onSearchChanged);
+    _searchTEC.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     var state = context.watch<HostsModel>();
+
+    var allHostNames = state.hosts.keys.toList();
+    var query = _searchTEC.text;
+    var filteredHosts = query.isEmpty
+        ? allHostNames
+        : Fuzzy(allHostNames)
+            .search(query)
+            .map((r) => r.matches.firstOrNull)
+            .where((el) => el != null)
+            .map((el) => el!.value)
+            .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -92,10 +128,11 @@ class OverviewPage extends StatelessWidget {
         title: Row(
           children: [
             const Icon(Icons.search),
-            const Flexible(
+            Flexible(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8.0),
                 child: TextField(
+                  controller: _searchTEC,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Search...',
@@ -114,9 +151,11 @@ class OverviewPage extends StatelessWidget {
           ],
         ),
       ),
-      body: GridView.count(
-        crossAxisCount: 2,
-        children: state.hosts.keys.map((name) => HostCard(name: name)).toList(),
+      body: GridView.builder(
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+        itemBuilder: (_, index) => HostCard(name: filteredHosts[index]),
+        itemCount: filteredHosts.length,
       ),
       floatingActionButton: const FloatingActionButton(
         onPressed: null,
