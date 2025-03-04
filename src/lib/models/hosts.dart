@@ -4,13 +4,25 @@ import 'dart:collection';
 import 'package:dart_ping/dart_ping.dart';
 import 'package:flutter/material.dart';
 
+import '../services/database.dart';
 import 'settings.dart';
 
 class Host {
-  Host(this.name);
+  Host({
+    required this.hostname,
+    this.displayName,
+    this.pingInterval,
+  });
 
-  final String name;
+  final String hostname;
+  final String? displayName;
+  final int? pingInterval;
+
   List<Duration?> time = [];
+  (Ping, StreamSubscription<PingData>)? ping;
+
+  get graphDataReversed =>
+      UnmodifiableListView(time.reversed.take(smallGraphElements));
 }
 
 const timeoutMs = 3000;
@@ -18,9 +30,32 @@ const pingHistoryMax = 100;
 const smallGraphElements = 20;
 
 final class HostsModel extends ChangeNotifier {
-  Ping _createPing(Host host, int interval) {
-    var ping = Ping(host.name, count: null, interval: interval);
-    ping.stream.listen((event) {
+  final Map<String, Host> _hosts = {};
+  late Settings _settings;
+  bool _initialLoading = true;
+
+  bool get isInitialLoading => _initialLoading;
+  Settings get settings => _settings;
+  UnmodifiableMapView<String, Host> get hosts =>
+      UnmodifiableMapView(_initialLoading ? {} : _hosts);
+  UnmodifiableListView<Duration?> getGraphDataReversed(String hostName) =>
+      UnmodifiableListView(
+          _initialLoading ? [] : _hosts[hostName]?.graphDataReversed ?? []);
+
+  HostsModel() {
+    unawaited(() async {
+      var hosts = await DatabaseService().getHosts();
+      for (var host in hosts) {
+        addHost(host);
+      }
+      _initialLoading = false;
+      notifyListeners();
+    }.call());
+  }
+
+  (Ping, StreamSubscription<PingData>) _createPing(Host host, int interval) {
+    var ping = Ping(host.hostname, count: null, interval: interval);
+    var subscription = ping.stream.listen((event) {
       if (event.response == null) return;
       host.time.add(event.response!.time);
       if (host.time.length > pingHistoryMax) {
@@ -28,52 +63,26 @@ final class HostsModel extends ChangeNotifier {
       }
       notifyListeners();
     });
-    return ping;
+    return (ping, subscription);
   }
 
-  late Settings _settings;
-  Settings get settings => _settings;
   set settings(Settings settings) {
     _settings = settings;
     _hosts.forEach((key, value) {
       unawaited(() async {
-        await value.$1.stop();
-        var ping = _createPing(value.$2, settings.interval);
-        value = (ping, value.$2);
+        if (value.ping != null) {
+          await value.ping!.$2.cancel();
+        }
+        value.ping = _createPing(value, settings.interval);
       }.call());
     });
-
-    // FIXME move to database
-    if (_hosts.isEmpty) {
-      addHost(Host('localhost'));
-      addHost(Host('127.0.0.1'));
-      addHost(Host('1.1.1.1'));
-      addHost(Host('google.com'));
-      // FIXME temporary
-      addHost(Host('38.0.101.76'));
-      addHost(Host('89.0.142.86'));
-      addHost(Host('237.84.2.178'));
-      addHost(Host('244.178.44.111'));
-      addHost(Host('10.8.0.1'));
-      addHost(Host('192.168.0.1'));
-      addHost(Host('89.207.132.170'));
-      addHost(Host('INVALID'));
-    }
 
     notifyListeners();
   }
 
-  final Map<String, (Ping, Host)> _hosts = {};
-  UnmodifiableMapView<String, (Ping, Host)> get hosts =>
-      UnmodifiableMapView(_hosts);
-
-  UnmodifiableListView<Duration?> getGraphDataReversed(String hostName) =>
-      UnmodifiableListView(
-          _hosts[hostName]?.$2.time.reversed.take(smallGraphElements) ?? []);
-
   void addHost(Host host) {
-    var ping = _createPing(host, settings.interval);
-    _hosts[host.name] = (ping, host);
+    host.ping = _createPing(host, settings.interval);
+    _hosts[host.hostname] = host;
     notifyListeners();
   }
 }

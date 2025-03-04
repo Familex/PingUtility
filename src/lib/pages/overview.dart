@@ -14,6 +14,7 @@ class HostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var state = context.watch<HostsModel>();
+
     var (min, avg, max) = () {
       var data = state
           .getGraphDataReversed(name)
@@ -110,19 +111,6 @@ class _OverviewPageState extends State<OverviewPage> {
 
   @override
   Widget build(BuildContext context) {
-    var state = context.watch<HostsModel>();
-
-    var allHostNames = state.hosts.keys.toList();
-    var query = _searchTEC.text;
-    var filteredHosts = query.isEmpty
-        ? allHostNames
-        : Fuzzy(allHostNames)
-            .search(query)
-            .map((r) => r.matches.firstOrNull)
-            .where((el) => el != null)
-            .map((el) => el!.value)
-            .toList();
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -152,12 +140,29 @@ class _OverviewPageState extends State<OverviewPage> {
           ],
         ),
       ),
-      body: GridView.builder(
-        gridDelegate:
-            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-        itemBuilder: (_, index) => HostCard(name: filteredHosts[index]),
-        itemCount: filteredHosts.length,
-      ),
+      body: Consumer<HostsModel>(builder: (context, state, __) {
+        if (state.isInitialLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        var allHostNames = state.hosts.keys.toList();
+        var query = _searchTEC.text;
+        var filteredHosts = query.isEmpty
+            ? allHostNames
+            : Fuzzy(allHostNames)
+                .search(query)
+                .map((r) => r.matches.firstOrNull)
+                .where((el) => el != null)
+                .map((el) => el!.value)
+                .toList();
+
+        return GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2),
+          itemBuilder: (_, index) => HostCard(name: filteredHosts[index]),
+          itemCount: filteredHosts.length,
+        );
+      }),
       floatingActionButton: const FloatingActionButton(
         onPressed: null,
         child: Icon(Icons.add),

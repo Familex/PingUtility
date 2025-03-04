@@ -1,6 +1,7 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../models/hosts.dart';
 import '../models/settings.dart';
 
 class DatabaseService {
@@ -29,8 +30,25 @@ class DatabaseService {
   }
 
   Future _onCreate(Database db, int version) async {
-    await db.execute("create table settings(interval integer)");
+    await db.execute('''
+      create table settings
+        ( interval integer not null
+        )
+    ''');
     await db.insert('settings', {'interval': 1});
+
+    await db.execute('''
+      create table hosts
+        ( id integer primary key autoincrement
+        , hostname text not null
+        , display_name text
+        , ping_interval integer
+        )
+    ''');
+    await db.insert('hosts', {'hostname': 'localhost'});
+    await db.insert('hosts', {'hostname': '127.0.0.1'});
+    await db.insert('hosts', {'hostname': '1.1.1.1'});
+    await db.insert('hosts', {'hostname': 'google.com'});
   }
 
   Future<Database> getDatabase() async {
@@ -48,5 +66,19 @@ class DatabaseService {
     return Settings(
       interval: settings.first['interval'] as int,
     );
+  }
+
+  Future<List<Host>> getHosts() async {
+    var db = await _databaseService.database;
+    var hosts = await db.query('hosts');
+    return hosts
+        .map(
+          (e) => Host(
+            hostname: e['hostname'] as String,
+            displayName: e['display_name'] as String?,
+            pingInterval: e['ping_interval'] as int?,
+          ),
+        )
+        .toList();
   }
 }
