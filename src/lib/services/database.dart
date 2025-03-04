@@ -51,10 +51,6 @@ class DatabaseService {
     await db.insert('hosts', {'hostname': 'google.com'});
   }
 
-  Future<Database> getDatabase() async {
-    return await _databaseService.database;
-  }
-
   Future setInterval(int interval) async {
     var db = await _databaseService.database;
     await db.update('settings', {'interval': interval});
@@ -80,5 +76,14 @@ class DatabaseService {
           ),
         )
         .toList();
+  }
+
+  Future addHost(Host host) async {
+    var db = await _databaseService.database;
+    await db.insert('hosts', {
+      'hostname': host.hostname,
+      'display_name': host.displayName,
+      'ping_interval': host.pingInterval,
+    });
   }
 }

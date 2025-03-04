@@ -1,23 +1,22 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:fuzzy/fuzzy.dart';
+import 'package:ping_utility/pages/new_host.dart';
 import 'package:ping_utility/pages/settings.dart';
 import 'package:provider/provider.dart';
 
 import '../models/hosts.dart';
+import '../models/settings.dart';
 
 class HostCard extends StatelessWidget {
-  const HostCard({super.key, required this.name});
+  const HostCard({super.key, required this.host});
 
-  final String name;
+  final Host host;
 
   @override
   Widget build(BuildContext context) {
-    var state = context.watch<HostsModel>();
-
     var (min, avg, max) = () {
-      var data = state
-          .getGraphDataReversed(name)
+      var data = host.graphDataReversed
           .where((el) => el != null)
           .map((el) => el!.inMilliseconds.toDouble());
       if (data.isEmpty) return (null, null, null);
@@ -38,10 +37,19 @@ class HostCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start, // move to the left
           children: [
-            Text(
-              name,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Row(children: [
+              Expanded(
+                child: Text(
+                  host.displayName ?? host.hostname,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              Consumer<Settings>(
+                  builder: (_, settings, __) => Text(
+                        "${host.pingInterval?.toString() ?? settings.interval}s",
+                      )),
+            ]),
             Expanded(
                 child: ClipRect(
                     child: LineChart(LineChartData(
@@ -56,7 +64,7 @@ class HostCard extends StatelessWidget {
                   spots: () {
                     List<FlSpot> result = [];
                     var ind = smallGraphElements;
-                    for (var val in state.getGraphDataReversed(name)) {
+                    for (var val in host.graphDataReversed) {
                       if (val == null) continue;
                       result.add(FlSpot(
                           (--ind).toDouble(), val.inMilliseconds.toDouble()));
@@ -159,12 +167,15 @@ class _OverviewPageState extends State<OverviewPage> {
         return GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2),
-          itemBuilder: (_, index) => HostCard(name: filteredHosts[index]),
+          itemBuilder: (_, index) =>
+              HostCard(host: state.hosts[filteredHosts[index]]!),
           itemCount: filteredHosts.length,
         );
       }),
-      floatingActionButton: const FloatingActionButton(
-        onPressed: null,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => NewHostPage()),
+        ),
         child: Icon(Icons.add),
       ),
     );

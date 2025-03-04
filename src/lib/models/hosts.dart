@@ -54,7 +54,8 @@ final class HostsModel extends ChangeNotifier {
   }
 
   (Ping, StreamSubscription<PingData>) _createPing(Host host, int interval) {
-    var ping = Ping(host.hostname, count: null, interval: interval);
+    var ping = Ping(host.hostname,
+        count: null, interval: host.pingInterval ?? interval);
     var subscription = ping.stream.listen((event) {
       if (event.response == null) return;
       host.time.add(event.response!.time);
@@ -84,5 +85,6 @@ final class HostsModel extends ChangeNotifier {
     host.ping = _createPing(host, settings.interval);
     _hosts[host.hostname] = host;
     notifyListeners();
+    DatabaseService().addHost(host);
   }
 }
