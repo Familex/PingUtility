@@ -5,6 +5,9 @@
 # sources
 !/src/
 
+# doc
+!README.md
+
 # dev environment
 !flake.nix
 !flake.lock
