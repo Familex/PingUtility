@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   lib,
   ...
@@ -6,43 +7,33 @@
   languages = {
     # Needed for Android SDK
     java = {
-      enable = true;
-      jdk.package = lib.mkForce pkgs.jdk17;
+      enable = lib.mkDefault true;
+      jdk.package = (lib.mkOverride 999) pkgs.jdk17;
     };
   };
 
   env = {
-    JAVA_HOME = lib.mkForce pkgs.jdk17.home;
-    ANDROID_JAVA_HOME = pkgs.jdk17.home;
+    JAVA_HOME = (lib.mkOverride 999) pkgs.jdk17.home;
+    ANDROID_JAVA_HOME = lib.mkDefault pkgs.jdk17.home;
   };
 
   android = {
-    enable = true;
-    flutter.enable = true;
+    enable = lib.mkDefault true;
+    flutter.enable = lib.mkDefault true;
 
-    buildTools.version = ["33.0.1"];
-    emulator.enable = false;
+    buildTools.version = lib.mkDefault ["33.0.1"];
 
     android-studio = {
-      enable = true;
-      package = pkgs.android-studio;
+      enable = lib.mkDefault true;
     };
-
-    extraLicenses = [
-      "android-sdk-preview-license"
-      "android-googletv-license"
-      "android-sdk-arm-dbt-license"
-      "google-gdk-license"
-      "intel-android-extra-license"
-      "intel-android-sysimage-license"
-      "mips-android-sysimage-license"
-    ];
   };
 
   scripts = {
-    run-android-studio.exec = ''
-      1> /dev/null 2> /dev/null android-studio "$DEVENV_ROOT" & disown
-    '';
+    run-android-studio = lib.mkIf config.android.android-studio.enable {
+      exec = ''
+        1> /dev/null 2> /dev/null android-studio "$DEVENV_ROOT" & disown
+      '';
+    };
 
     adb-restart.exec = ''
       adb kill-server
