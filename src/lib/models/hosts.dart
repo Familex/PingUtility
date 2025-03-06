@@ -86,4 +86,24 @@ final class HostsModel extends ChangeNotifier {
     _hosts[host.hostname] = host;
     notifyListeners();
   }
+
+  void editHost(String oldHostname, Host host) {
+    unawaited(() async {
+      if (host.ping != null) {
+        await host.ping!.$2.cancel();
+      }
+      host.ping = _createPing(host, settings.interval);
+    }.call());
+    _hosts.remove(oldHostname);
+    _hosts[host.hostname] = host;
+    notifyListeners();
+  }
+
+  void deleteHost(Host host) {
+    if (host.ping != null) {
+      host.ping!.$2.cancel();
+    }
+    _hosts.remove(host.hostname);
+    notifyListeners();
+  }
 }

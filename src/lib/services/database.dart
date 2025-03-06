@@ -40,7 +40,7 @@ class DatabaseService {
     await db.execute('''
       create table hosts
         ( id integer primary key autoincrement
-        , hostname text not null
+        , hostname text not null unique
         , display_name text
         , ping_interval integer
         )
@@ -78,12 +78,33 @@ class DatabaseService {
         .toList();
   }
 
-  Future addHost(Host host) async {
+  Future<bool> addHost(Host host) async {
     var db = await _databaseService.database;
-    await db.insert('hosts', {
+    var insertRes = await db.insert('hosts', {
       'hostname': host.hostname,
       'display_name': host.displayName,
       'ping_interval': host.pingInterval,
     });
+    return insertRes != 0;
+  }
+
+  Future<bool> editHost(String oldHostname, Host host) async {
+    var db = await _databaseService.database;
+    var deleteRes = await db
+        .delete('hosts', where: 'hostname = ?', whereArgs: [oldHostname]);
+    print("$oldHostname deleted: $deleteRes");
+    var insertRes = await db.insert('hosts', {
+      'hostname': host.hostname,
+      'display_name': host.displayName,
+      'ping_interval': host.pingInterval,
+    });
+    return insertRes != 0;
+  }
+
+  Future<bool> deleteHost(Host host) async {
+    var db = await _databaseService.database;
+    var res = await db
+        .delete('hosts', where: 'hostname = ?', whereArgs: [host.hostname]);
+    return res == 1;
   }
 }

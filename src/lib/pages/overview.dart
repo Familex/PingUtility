@@ -1,11 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:fuzzy/fuzzy.dart';
+import 'package:holding_gesture/holding_gesture.dart';
 import 'package:provider/provider.dart';
 
 import '../models/hosts.dart';
 import '../models/settings.dart';
-import './new_host.dart';
+import './host.dart';
 import './settings.dart';
 
 class HostCard extends StatelessWidget {
@@ -31,59 +32,70 @@ class HostCard extends StatelessWidget {
       return (min, total / data.length, max);
     }();
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // move to the left
-          children: [
-            Row(children: [
+    return HoldTimeoutDetector(
+      onTimerInitiated: () {},
+      onTimeout: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HostPage(host: host)),
+        );
+      },
+      holdTimeout: Duration(milliseconds: 150),
+      enableHapticFeedback: true,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, // move to the left
+            children: [
+              Row(children: [
+                Expanded(
+                  child: Text(
+                    host.displayName ?? host.hostname,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                Consumer<Settings>(
+                    builder: (_, settings, __) => Text(
+                          "${host.pingInterval?.toString() ?? settings.interval}s",
+                        )),
+              ]),
               Expanded(
-                child: Text(
-                  host.displayName ?? host.hostname,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              Consumer<Settings>(
-                  builder: (_, settings, __) => Text(
-                        "${host.pingInterval?.toString() ?? settings.interval}s",
-                      )),
-            ]),
-            Expanded(
-                child: ClipRect(
-                    child: LineChart(LineChartData(
-              lineTouchData: LineTouchData(enabled: false),
-              gridData: FlGridData(show: false),
-              titlesData: FlTitlesData(show: false),
-              lineBarsData: [
-                LineChartBarData(
-                  isCurved: true,
-                  dotData: FlDotData(show: false),
-                  color: Theme.of(context).colorScheme.primary,
-                  spots: () {
-                    List<FlSpot> result = [];
-                    var ind = smallGraphElements;
-                    for (var val in host.graphDataReversed) {
-                      if (val == null) continue;
-                      result.add(FlSpot(
-                          (--ind).toDouble(), val.inMilliseconds.toDouble()));
-                    }
-                    return result;
-                  }(),
-                ),
-              ],
-            )))),
-            Row(
-              children: [
-                const Spacer(),
-                (avg != null && min != null && max != null
-                    ? Text(
-                        '${min.toStringAsFixed(2)}/${avg.toStringAsFixed(2)}/${max.toStringAsFixed(2)} ms')
-                    : Text('N/A', style: TextStyle(color: Colors.grey))),
-              ],
-            )
-          ],
+                  child: ClipRect(
+                      child: LineChart(LineChartData(
+                lineTouchData: LineTouchData(enabled: false),
+                gridData: FlGridData(show: false),
+                titlesData: FlTitlesData(show: false),
+                lineBarsData: [
+                  LineChartBarData(
+                    isCurved: true,
+                    dotData: FlDotData(show: false),
+                    color: Theme.of(context).colorScheme.primary,
+                    spots: () {
+                      List<FlSpot> result = [];
+                      var ind = smallGraphElements;
+                      for (var val in host.graphDataReversed) {
+                        if (val == null) continue;
+                        result.add(FlSpot(
+                            (--ind).toDouble(), val.inMilliseconds.toDouble()));
+                      }
+                      return result;
+                    }(),
+                  ),
+                ],
+              )))),
+              Row(
+                children: [
+                  const Spacer(),
+                  (avg != null && min != null && max != null
+                      ? Text(
+                          '${min.toStringAsFixed(2)}/${avg.toStringAsFixed(2)}/${max.toStringAsFixed(2)} ms')
+                      : Text('N/A', style: TextStyle(color: Colors.grey))),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -174,7 +186,7 @@ class _OverviewPageState extends State<OverviewPage> {
       }),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => NewHostPage()),
+          MaterialPageRoute(builder: (context) => HostPage(host: null)),
         ),
         child: Icon(Icons.add),
       ),
