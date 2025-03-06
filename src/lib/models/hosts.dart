@@ -85,6 +85,5 @@ final class HostsModel extends ChangeNotifier {
     host.ping = _createPing(host, settings.interval);
     _hosts[host.hostname] = host;
     notifyListeners();
-    DatabaseService().addHost(host);
   }
 }

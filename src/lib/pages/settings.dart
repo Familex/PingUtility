@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ping_utility/utils/non_empty_formatter.dart';
 import 'package:provider/provider.dart';
 
 import '../models/settings.dart';
+import '../utils/non_empty_formatter.dart';
 
 class SettingsPage extends StatelessWidget {
   SettingsPage({super.key});

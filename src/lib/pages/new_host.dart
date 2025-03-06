@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/hosts.dart';
 import '../models/settings.dart';
+import '../services/database.dart';
 
 class NewHostPage extends StatefulWidget {
   const NewHostPage({super.key});
@@ -39,6 +40,7 @@ class _NewHostPageState extends State<NewHostPage> {
                     pingInterval: pingInterval,
                   );
                   context.read<HostsModel>().addHost(host);
+                  DatabaseService().addHost(host);
 
                   Navigator.of(context).pop();
                 }

@@ -1,12 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:fuzzy/fuzzy.dart';
-import 'package:ping_utility/pages/new_host.dart';
-import 'package:ping_utility/pages/settings.dart';
 import 'package:provider/provider.dart';
 
 import '../models/hosts.dart';
 import '../models/settings.dart';
+import './new_host.dart';
+import './settings.dart';
 
 class HostCard extends StatelessWidget {
   const HostCard({super.key, required this.host});
