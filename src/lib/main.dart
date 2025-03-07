@@ -1,3 +1,4 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,7 +8,8 @@ import 'pages/overview.dart';
 import 'services/database.dart';
 
 // XXX will be overwritten in main function
-Settings settings = Settings(interval: -1);
+Settings settings =
+    Settings(interval: -1, themeMode: -1, themeColor: Color(-1));
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,12 +36,27 @@ class MainWindow extends StatelessWidget {
           },
         )
       ],
-      child: MaterialApp(
-        title: 'Ping Utility',
-        theme: ThemeData(
-          useMaterial3: true,
+      child: DynamicColorBuilder(
+        builder: (lightDynamic, darkDynamic) => MaterialApp(
+          title: 'Ping Utility',
+          themeMode: settings.themeMode,
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: lightDynamic ??
+                ColorScheme.fromSeed(
+                  seedColor: settings.themeColor,
+                ),
+          ),
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            colorScheme: darkDynamic ??
+                ColorScheme.fromSeed(
+                  seedColor: settings.themeColor,
+                  brightness: Brightness.dark,
+                ),
+          ),
+          home: OverviewPage(),
         ),
-        home: OverviewPage(),
       ),
     );
   }

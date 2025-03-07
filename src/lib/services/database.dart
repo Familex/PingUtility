@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -24,7 +25,8 @@ class DatabaseService {
     return await openDatabase(
       path,
       onCreate: _onCreate,
-      version: 1,
+      onUpgrade: _onUpgrade,
+      version: 2,
       onConfigure: (db) async => await db.execute('PRAGMA foreign_keys = ON'),
     );
   }
@@ -33,9 +35,15 @@ class DatabaseService {
     await db.execute('''
       create table settings
         ( interval integer not null
+        , theme_mode integer
+        , theme_color integer
         )
     ''');
-    await db.insert('settings', {'interval': 1});
+    await db.insert('settings', {
+      'interval': 1,
+      'theme_mode': 0,
+      'theme_color': Colors.deepPurple.value
+    });
 
     await db.execute('''
       create table hosts
@@ -51,9 +59,12 @@ class DatabaseService {
     await db.insert('hosts', {'hostname': 'google.com'});
   }
 
-  Future setInterval(int interval) async {
-    var db = await _databaseService.database;
-    await db.update('settings', {'interval': interval});
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    // Test versions
+    if (oldVersion < 2) {
+      await db.execute('drop table settings');
+      await db.execute('drop table hosts');
+    }
   }
 
   Future<Settings> getSettings() async {
@@ -61,6 +72,8 @@ class DatabaseService {
     var settings = await db.query('settings');
     return Settings(
       interval: settings.first['interval'] as int,
+      themeMode: settings.first['theme_mode'] as int,
+      themeColor: Color(settings.first['theme_color'] as int),
     );
   }
 
@@ -78,6 +91,21 @@ class DatabaseService {
         .toList();
   }
 
+  Future setInterval(int interval) async {
+    var db = await _databaseService.database;
+    await db.update('settings', {'interval': interval});
+  }
+
+  Future setThemeMode(ThemeMode themeMode) async {
+    var db = await _databaseService.database;
+    await db.update('settings', {'theme_mode': themeMode.index});
+  }
+
+  Future setThemeColor(Color themeColor) async {
+    var db = await _databaseService.database;
+    await db.update('settings', {'theme_color': themeColor.value});
+  }
+
   Future<bool> addHost(Host host) async {
     var db = await _databaseService.database;
     var insertRes = await db.insert('hosts', {
@@ -92,7 +120,6 @@ class DatabaseService {
     var db = await _databaseService.database;
     var deleteRes = await db
         .delete('hosts', where: 'hostname = ?', whereArgs: [oldHostname]);
-    print("$oldHostname deleted: $deleteRes");
     var insertRes = await db.insert('hosts', {
       'hostname': host.hostname,
       'display_name': host.displayName,
