@@ -8,8 +8,7 @@ import 'pages/overview.dart';
 import 'services/database.dart';
 
 // XXX will be overwritten in main function
-Settings settings =
-    Settings(interval: -1, themeMode: -1, themeColor: const Color(-1));
+Settings settings = Settings(interval: -1, themeMode: -1, customColor: null);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,18 +41,17 @@ class MainWindow extends StatelessWidget {
           themeMode: settings.themeMode,
           theme: ThemeData(
             useMaterial3: true,
-            colorScheme: lightDynamic ??
-                ColorScheme.fromSeed(
-                  seedColor: settings.themeColor,
-                ),
+            colorScheme: settings.customThemeColor != null
+                ? ColorScheme.fromSeed(seedColor: settings.customThemeColor!)
+                : darkDynamic ??
+                    ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           ),
           darkTheme: ThemeData(
             useMaterial3: true,
-            colorScheme: darkDynamic ??
-                ColorScheme.fromSeed(
-                  seedColor: settings.themeColor,
-                  brightness: Brightness.dark,
-                ),
+            colorScheme: settings.customThemeColor != null
+                ? ColorScheme.fromSeed(seedColor: settings.customThemeColor!)
+                : darkDynamic ??
+                    ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           ),
           home: const OverviewPage(),
         ),

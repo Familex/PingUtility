@@ -26,7 +26,7 @@ class DatabaseService {
       path,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
-      version: 2,
+      version: 3,
       onConfigure: (db) async => await db.execute('PRAGMA foreign_keys = ON'),
     );
   }
@@ -35,14 +35,14 @@ class DatabaseService {
     await db.execute('''
       create table settings
         ( interval integer not null
-        , theme_mode integer
-        , theme_color integer
+        , theme_mode integer not null
+        , custom_theme_color integer
         )
     ''');
     await db.insert('settings', {
-      'interval': 1,
-      'theme_mode': 0,
-      'theme_color': Colors.deepPurple.value
+      'interval': 2,
+      'theme_mode': ThemeMode.system.index,
+      'custom_theme_color': null,
     });
 
     await db.execute('''
@@ -61,7 +61,7 @@ class DatabaseService {
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     // Test versions
-    if (oldVersion < 2) {
+    if (oldVersion < 3) {
       await db.execute('drop table settings');
       await db.execute('drop table hosts');
     }
@@ -70,10 +70,11 @@ class DatabaseService {
   Future<Settings> getSettings() async {
     var db = await _databaseService.database;
     var settings = await db.query('settings');
+    var customThemeColor = settings.first['custom_theme_color'] as int?;
     return Settings(
       interval: settings.first['interval'] as int,
       themeMode: settings.first['theme_mode'] as int,
-      themeColor: Color(settings.first['theme_color'] as int),
+      customColor: customThemeColor == null ? null : Color(customThemeColor),
     );
   }
 
@@ -101,9 +102,9 @@ class DatabaseService {
     await db.update('settings', {'theme_mode': themeMode.index});
   }
 
-  Future setThemeColor(Color themeColor) async {
+  Future setCustomThemeColor(Color? customColor) async {
     var db = await _databaseService.database;
-    await db.update('settings', {'theme_color': themeColor.value});
+    await db.update('settings', {'custom_theme_color': customColor?.value});
   }
 
   Future<bool> addHost(Host host) async {
