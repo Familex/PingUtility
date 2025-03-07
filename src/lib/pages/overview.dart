@@ -40,7 +40,7 @@ class HostCard extends StatelessWidget {
           MaterialPageRoute(builder: (context) => HostPage(host: host)),
         );
       },
-      holdTimeout: Duration(milliseconds: 150),
+      holdTimeout: const Duration(milliseconds: 150),
       enableHapticFeedback: true,
       child: Card(
         child: Padding(
@@ -64,13 +64,13 @@ class HostCard extends StatelessWidget {
               Expanded(
                   child: ClipRect(
                       child: LineChart(LineChartData(
-                lineTouchData: LineTouchData(enabled: false),
-                gridData: FlGridData(show: false),
-                titlesData: FlTitlesData(show: false),
+                lineTouchData: const LineTouchData(enabled: false),
+                gridData: const FlGridData(show: false),
+                titlesData: const FlTitlesData(show: false),
                 lineBarsData: [
                   LineChartBarData(
                     isCurved: true,
-                    dotData: FlDotData(show: false),
+                    dotData: const FlDotData(show: false),
                     color: Theme.of(context).colorScheme.primary,
                     spots: () {
                       List<FlSpot> result = [];
@@ -91,7 +91,7 @@ class HostCard extends StatelessWidget {
                   (avg != null && min != null && max != null
                       ? Text(
                           '${min.toStringAsFixed(2)}/${avg.toStringAsFixed(2)}/${max.toStringAsFixed(2)} ms')
-                      : Text('N/A', style: TextStyle(color: Colors.grey))),
+                      : const Text('N/A', style: TextStyle(color: Colors.grey))),
                 ],
               )
             ],
@@ -139,10 +139,10 @@ class _OverviewPageState extends State<OverviewPage> {
             const Icon(Icons.search),
             Flexible(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: TextField(
                   controller: _searchTEC,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Search...',
                   ),
@@ -186,9 +186,9 @@ class _OverviewPageState extends State<OverviewPage> {
       }),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => HostPage(host: null)),
+          MaterialPageRoute(builder: (context) => const HostPage(host: null)),
         ),
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }

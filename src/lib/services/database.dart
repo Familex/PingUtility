@@ -118,6 +118,7 @@ class DatabaseService {
 
   Future<bool> editHost(String oldHostname, Host host) async {
     var db = await _databaseService.database;
+    // ignore: unused_local_variable
     var deleteRes = await db
         .delete('hosts', where: 'hostname = ?', whereArgs: [oldHostname]);
     var insertRes = await db.insert('hosts', {

@@ -9,7 +9,7 @@ import 'services/database.dart';
 
 // XXX will be overwritten in main function
 Settings settings =
-    Settings(interval: -1, themeMode: -1, themeColor: Color(-1));
+    Settings(interval: -1, themeMode: -1, themeColor: const Color(-1));
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,7 +55,7 @@ class MainWindow extends StatelessWidget {
                   brightness: Brightness.dark,
                 ),
           ),
-          home: OverviewPage(),
+          home: const OverviewPage(),
         ),
       ),
     );
