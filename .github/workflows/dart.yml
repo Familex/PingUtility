@@ -25,3 +25,20 @@ jobs:
         flutter clean
         flutter pub get
         flutter pub upgrade
+        cd ..
+
+    - name: Extract version from pubspec.yaml
+      id: extract_version
+      run: |
+        VERSION=$(grep -o 'version:.*' pubspec.yaml | awk '{print $2}')
+        echo ::set-output name=version::"$VERSION"
+
+    - name: Build apks
+      run: |
+        mkdir ./pub-build
+        cd ./src
+        flutter build apk --target-platform android-arm64 --release
+        mv ./build/app/outputs/flutter-apk/app-arm64-v8a-release.apk ../pub-build/ping_utility-v${{ steps.extract_version.outputs.version}}-arm64-v8a.apk
+        flutter build apk --target-platform android-arm --release
+        mv ./build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk ../pub-build/ping_utility-v${{ steps.extract_version.outputs.version}}-armeabi-v7a.apk
+        cd ..
