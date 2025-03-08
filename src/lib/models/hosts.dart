@@ -20,6 +20,7 @@ class Host {
 
   List<Duration?> time = [];
   (Ping, StreamSubscription<PingData>)? ping;
+  Queue<(Ping, StreamSubscription<PingData>)> oneTimePing = Queue.from([]);
 
   get graphDataReversed =>
       UnmodifiableListView(time.reversed.take(smallGraphElements));
@@ -53,16 +54,26 @@ final class HostsModel extends ChangeNotifier {
     }.call());
   }
 
-  (Ping, StreamSubscription<PingData>) _createPing(Host host, int interval) {
-    var ping = Ping(host.hostname,
-        count: null, interval: host.pingInterval ?? interval);
+  (Ping, StreamSubscription<PingData>)? _createPing(Host host, int? count) {
+    assert(count == null || count == 1);
+    var interval = count != null ? 1 : host.pingInterval ?? settings.interval;
+    if (interval <= 0) return null;
+
+    var ping = Ping(host.hostname, count: count, interval: interval);
     var subscription = ping.stream.listen((event) {
-      if (event.response == null) return;
-      host.time.add(event.response!.time);
-      if (host.time.length > pingHistoryMax) {
-        host.time.removeAt(0);
+      // add to history
+      if (event.response != null) {
+        host.time.add(event.response!.time);
+        if (host.time.length > pingHistoryMax) {
+          host.time.removeAt(0);
+        }
+        notifyListeners();
       }
-      notifyListeners();
+      // remove from oneTimePing queue
+      if (count != null) {
+        assert(host.oneTimePing.isNotEmpty);
+        host.oneTimePing.removeFirst().$2.cancel();
+      }
     });
     return (ping, subscription);
   }
@@ -74,7 +85,7 @@ final class HostsModel extends ChangeNotifier {
         if (value.ping != null) {
           await value.ping!.$2.cancel();
         }
-        value.ping = _createPing(value, settings.interval);
+        value.ping = _createPing(value, null);
       }.call());
     });
 
@@ -82,17 +93,25 @@ final class HostsModel extends ChangeNotifier {
   }
 
   void addHost(Host host) {
-    host.ping = _createPing(host, settings.interval);
+    host.ping = _createPing(host, null);
     _hosts[host.hostname] = host;
     notifyListeners();
   }
 
+  Future startOneTimePing(String hostname) async {
+    if (_hosts[hostname] == null) return;
+    var ping = _createPing(_hosts[hostname]!, 1);
+    if (ping != null) {
+      _hosts[hostname]!.oneTimePing.add(ping);
+    }
+  }
+
   void editHost(String oldHostname, Host host) {
     unawaited(() async {
-      if (host.ping != null) {
-        await host.ping!.$2.cancel();
+      if (_hosts[oldHostname]?.ping != null) {
+        await _hosts[oldHostname]?.ping!.$2.cancel();
       }
-      host.ping = _createPing(host, settings.interval);
+      host.ping = _createPing(host, null);
     }.call());
     _hosts.remove(oldHostname);
     _hosts[host.hostname] = host;

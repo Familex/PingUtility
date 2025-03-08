@@ -34,12 +34,11 @@ class HostCard extends StatelessWidget {
 
     return HoldTimeoutDetector(
       onTimerInitiated: () {},
-      onTimeout: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => HostPage(host: host)),
-        );
-      },
+      onTimeout: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HostPage(host: host)),
+      ),
+      onTap: () => context.read<HostsModel>().startOneTimePing(host.hostname),
       holdTimeout: const Duration(milliseconds: 150),
       enableHapticFeedback: true,
       child: Card(
