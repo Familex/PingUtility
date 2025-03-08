@@ -30,7 +30,7 @@ jobs:
     - name: Extract version from pubspec.yaml
       id: extract_version
       run: |
-        VERSION=$(grep -o 'version:.*' pubspec.yaml | awk '{print $2}')
+        VERSION=$(grep -o 'version:.*' ./src/pubspec.yaml | awk '{print $2}')
         echo ::set-output name=version::"$VERSION"
 
     - name: Build apks
