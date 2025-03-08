@@ -82,46 +82,47 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                Checkbox(
-                    value: settings.customThemeColor != null,
-                    onChanged: (value) {
-                      settings.customThemeColor =
-                          value ?? false ? Colors.deepPurple : null;
-                    }),
-                Text(
-                  'Use custom theme color',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const Spacer(),
-                FilledButton(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: settings.customThemeColor ?? Colors.deepPurple,
-                    ),
-                  ),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        title: const Text('Pick a color'),
-                        content: SingleChildScrollView(
-                          child: HueRingPicker(
-                            pickerColor:
-                                settings.customThemeColor ?? Colors.deepPurple,
-                            onColorChanged: (color) {
-                              settings.customThemeColor = color;
-                            },
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            )
+            CheckboxListTile(
+              controlAffinity: ListTileControlAffinity.leading,
+              contentPadding: EdgeInsets.zero,
+              title: Row(
+                children: [
+                  const Text('Use custom theme color'),
+                  const Spacer(),
+                  RawMaterialButton(
+                    fillColor: settings.customThemeColor ?? Colors.grey,
+                    shape: const CircleBorder(),
+                    onPressed: settings.customThemeColor == null
+                        ? null
+                        : () {
+                            showDialog(
+                              context: context,
+                              builder: (_) => AlertDialog(
+                                title: const Text('Pick a color'),
+                                content: SingleChildScrollView(
+                                  child: MaterialPicker(
+                                    pickerColor: settings.customThemeColor ??
+                                        Colors.deepPurple,
+                                    enableLabel: true,
+                                    portraitOnly: true,
+                                    onColorChanged: (color) {
+                                      settings.customThemeColor = color;
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                  )
+                ],
+              ),
+              value: settings.customThemeColor != null,
+              onChanged: (value) {
+                settings.customThemeColor =
+                    value ?? false ? Colors.deepPurple : null;
+              },
+            ),
           ],
         ),
       ),

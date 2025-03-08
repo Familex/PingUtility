@@ -91,7 +91,13 @@ class HostCard extends StatelessWidget {
                   (avg != null && min != null && max != null
                       ? Text(
                           '${min.toStringAsFixed(2)}/${avg.toStringAsFixed(2)}/${max.toStringAsFixed(2)} ms')
-                      : const Text('N/A', style: TextStyle(color: Colors.grey))),
+                      : const Text(
+                          'N/A',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            overflow: TextOverflow.clip,
+                          ),
+                        )),
                 ],
               )
             ],

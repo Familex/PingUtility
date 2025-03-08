@@ -36,26 +36,52 @@ class MainWindow extends StatelessWidget {
         )
       ],
       child: DynamicColorBuilder(
-        builder: (lightDynamic, darkDynamic) => MaterialApp(
-          title: 'Ping Utility',
-          themeMode: settings.themeMode,
-          theme: ThemeData(
-            useMaterial3: true,
-            colorScheme: settings.customThemeColor != null
-                ? ColorScheme.fromSeed(seedColor: settings.customThemeColor!)
-                : darkDynamic ??
-                    ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          ),
-          darkTheme: ThemeData(
-            useMaterial3: true,
-            colorScheme: settings.customThemeColor != null
-                ? ColorScheme.fromSeed(seedColor: settings.customThemeColor!)
-                : darkDynamic ??
-                    ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          ),
-          home: const OverviewPage(),
+        builder: (lightDynamic, darkDynamic) => Consumer<Settings>(
+          builder: (_, settings, __) {
+            return MaterialApp(
+              title: 'Ping Utility',
+              themeMode: settings.themeMode,
+              theme: getLightColorScheme(settings, lightDynamic),
+              darkTheme: getDarkColorScheme(settings, darkDynamic),
+              home: const OverviewPage(),
+            );
+          },
         ),
       ),
     );
   }
+}
+
+ThemeData getLightColorScheme(Settings settings, ColorScheme? lightDynamic) {
+  if (settings.customThemeColor != null) {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: settings.customThemeColor!,
+        brightness: Brightness.light,
+      ),
+    );
+  }
+  return ThemeData(
+    useMaterial3: true,
+    colorScheme:
+        lightDynamic ?? ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+  );
+}
+
+ThemeData getDarkColorScheme(Settings settings, ColorScheme? darkDynamic) {
+  if (settings.customThemeColor != null) {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: settings.customThemeColor!,
+        brightness: Brightness.dark,
+      ),
+    );
+  }
+  return ThemeData(
+    useMaterial3: true,
+    colorScheme:
+        darkDynamic ?? ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+  );
 }
