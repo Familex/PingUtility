@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dart_ping/dart_ping.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -20,6 +21,8 @@ class _HostPageState extends State<HostPage> {
   late String _hostname;
   late String _displayName;
   late String _pingIntervalStr;
+  bool? _hostnameTestResult;
+  (Ping, StreamSubscription<PingData>)? _hostnameTestPing;
   late bool isEditing;
 
   @override
@@ -144,19 +147,36 @@ class _HostPageState extends State<HostPage> {
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(
-                initialValue: _hostname,
-                onSaved: (value) => _hostname = value!.trim(),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Required field';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Hostname',
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      initialValue: _hostname,
+                      onSaved: (value) => _hostname = value!.trim(),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Required field';
+                        }
+                        return null;
+                      },
+                      decoration: const InputDecoration(
+                        border: UnderlineInputBorder(),
+                        labelText: 'Hostname',
+                      ),
+                    ),
+                  ),
+                  MaterialButton(
+                    onPressed: _startHostnameTest,
+                    color: _hostnameTestResult == null
+                        ? Colors.grey.shade300
+                        : _hostnameTestResult!
+                            ? Colors.green.shade300
+                            : Colors.red.shade300,
+                    child: _hostnameTestResult == null
+                        ? const Text('Test')
+                        : Text(_hostnameTestResult! ? 'Online' : 'Offline'),
+                  )
+                ],
               ),
               const SizedBox(height: 10),
               TextFormField(
@@ -195,5 +215,26 @@ class _HostPageState extends State<HostPage> {
         ),
       ),
     );
+  }
+
+  Future _startHostnameTest() async {
+    _formKey.currentState?.save();
+    _hostnameTestResult = null;
+    if (_hostnameTestPing != null) {
+      _hostnameTestPing!.$2.cancel();
+      _hostnameTestPing = null;
+    }
+
+    var ping = Ping(_hostname, count: 1, timeout: 1);
+    var subscription = ping.stream.listen((event) {
+      setState(() {
+        if (event.summary == null) {
+          _hostnameTestResult = event.response != null;
+        } else {
+          _hostnameTestResult = (event.summary!.received > 0);
+        }
+      });
+    });
+    _hostnameTestPing = (ping, subscription);
   }
 }
