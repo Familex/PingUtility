@@ -8,7 +8,9 @@
 
 ## Overview
 
-TODO
+PingUtility is a flutter application for monitoring ping responses.
+
+![Application overview page in two themes](./docs/assets/overview-page.png)
 
 ## Build
 

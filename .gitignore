@@ -8,6 +8,7 @@
 # doc
 !README.md
 !LICENSE
+!/docs/
 
 # dev environment
 !flake.nix
