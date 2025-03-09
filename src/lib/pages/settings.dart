@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:jiffy/jiffy.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../models/settings.dart';
 import '../utils/non_empty_formatter.dart';
@@ -26,7 +29,36 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("Settings"),
+        title: Row(
+          children: [
+            const Text('Settings'),
+            const Spacer(),
+            IconButton(
+              icon: const Icon(Icons.info),
+              onPressed: () => showDialog(
+                context: context,
+                builder: (context) => FutureBuilder(
+                  future: buildInfoPopup(context),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return alertDialogWrapper(
+                        const Text('Loading...'),
+                        const Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return alertDialogWrapper(
+                        const Text('Error'),
+                        Text(snapshot.error.toString()),
+                      );
+                    }
+                    return snapshot.data!;
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -128,4 +160,74 @@ class SettingsPage extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<Widget> buildInfoPopup(BuildContext context) async {
+  var packageInfo = await PackageInfo.fromPlatform();
+  var installationDatePretty = packageInfo.installTime == null
+      ? null
+      : Jiffy.parseFromDateTime(packageInfo.installTime!).yMMMEdjm;
+  var fromLastUpdatePretty = packageInfo.updateTime == null
+      ? null
+      : Jiffy.parseFromDateTime(packageInfo.updateTime!).from(Jiffy.now());
+
+  return alertDialogWrapper(
+    Text('${packageInfo.appName} v${packageInfo.version}'),
+    Column(
+      children: [
+        const ListTile(
+          title: Text(
+              'Flutter application for ping monitoring. It is open source and can be found on GitHub.'),
+        ),
+        ListTile(
+          leading: const Icon(Icons.link_outlined),
+          title: const Text('Source code'),
+          onTap: () => launchUrl(
+            Uri.parse('https://github.com/Familex/PingUtility'),
+          ),
+        ),
+        ListTile(
+          leading: const Icon(Icons.report_problem_outlined),
+          title: const Text('Leave feedback (issue)'),
+          onTap: () => launchUrl(
+            Uri.parse('https://github.com/Familex/PingUtility/issues'),
+          ),
+        ),
+        ListTile(
+          leading: const Icon(Icons.description_outlined),
+          title: const Text('Licenses'),
+          onTap: () => showLicensePage(
+            context: context,
+            applicationName: packageInfo.appName,
+            applicationVersion: packageInfo.version,
+            // FIXME put applicationIcon here
+          ),
+        ),
+        if (packageInfo.installerStore != null)
+          ListTile(
+            leading: const Icon(Icons.info_outlined),
+            title: const Text('Installation method'),
+            subtitle: Text(packageInfo.installerStore!),
+          ),
+        if (installationDatePretty != null && fromLastUpdatePretty != null)
+          ListTile(
+            leading: const Icon(Icons.calendar_month_outlined),
+            title: const Text('From last update'),
+            subtitle: Text(fromLastUpdatePretty),
+            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('installed on $installationDatePretty'),
+              ),
+            ),
+          )
+      ],
+    ),
+  );
+}
+
+Widget alertDialogWrapper(Widget title, Widget content) {
+  return AlertDialog(
+    title: title,
+    content: SingleChildScrollView(child: content),
+  );
 }
