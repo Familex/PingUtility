@@ -15,3 +15,6 @@
 !devenv.lock
 !devenv.yaml
 !.envrc
+
+# workflows
+!/.github/

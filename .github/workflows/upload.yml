@@ -1,0 +1,47 @@
+name: Build and upload apks
+
+on:
+  workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: subosito/flutter-action@v2
+      with: {flutter-version: "3.24.4"}
+    - uses: dart-lang/setup-dart@v1
+      with: {sdk: "3.5.4"}
+    - uses: actions/setup-java@v1
+      with: {java-version: "17"}
+
+    - name: Setup dependencies
+      run: |
+        cd ./src
+        flutter clean
+        flutter pub get
+        flutter pub upgrade
+        cd ..
+
+    - name: Extract version from pubspec.yaml
+      id: extract_version
+      run: |
+        VERSION=$(grep -o 'version:.*' ./src/pubspec.yaml | awk '{print $2}')
+        echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+
+    - name: Build apks
+      run: |
+        mkdir ./pub-build
+        cd ./src
+        flutter build apk --target-platform android-arm64 --release
+        mv "./build/app/outputs/flutter-apk/app-release.apk" "../pub-build/ping_utility-v${APP_VERSION}-arm64-v8a.apk"
+        flutter build apk --target-platform android-arm --release
+        mv "./build/app/outputs/flutter-apk/app-release.apk" "../pub-build/ping_utility-v${APP_VERSION}-armeabi-v7a.apk"
+        cd ..
+
+    - name: Upload apks
+      uses: actions/upload-artifact@v4
+      with:
+        name: all-apks
+        path: ./pub-build/**
