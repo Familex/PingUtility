@@ -1,10 +1,7 @@
-name: Dart
+name: Build and upload apks
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  workflow_dispatch
 
 jobs:
   build:
