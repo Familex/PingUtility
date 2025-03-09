@@ -3,6 +3,7 @@
 !.gitignore
 
 !/lib/
+!LICENSE
 
 !.metadata
 !analysis_options.yaml
