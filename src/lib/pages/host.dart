@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../models/hosts.dart';
 import '../models/settings.dart';
 import '../services/database.dart';
+import '../utils/pu_widgets.dart';
 
 class HostPage extends StatefulWidget {
   const HostPage({super.key, this.host});
@@ -150,7 +151,9 @@ class _HostPageState extends State<HostPage> {
               Row(
                 children: [
                   Expanded(
-                    child: TextFormField(
+                    child: puTextFormField(
+                      context: context,
+                      labelText: 'Hostname',
                       initialValue: _hostname,
                       onSaved: (value) => _hostname = value!.trim(),
                       validator: (value) {
@@ -159,19 +162,19 @@ class _HostPageState extends State<HostPage> {
                         }
                         return null;
                       },
-                      decoration: const InputDecoration(
-                        border: UnderlineInputBorder(),
-                        labelText: 'Hostname',
-                      ),
                     ),
                   ),
-                  MaterialButton(
+                  const SizedBox(width: 10.0),
+                  puButton(
+                    context: context,
                     onPressed: _startHostnameTest,
                     color: _hostnameTestResult == null
-                        ? Colors.grey.shade300
+                        ? null
                         : _hostnameTestResult!
-                            ? Colors.green.shade300
-                            : Colors.red.shade300,
+                            ? Colors.green.shade100
+                            : Colors.red.shade100,
+                    textColor:
+                        _hostnameTestResult == null ? null : Colors.black,
                     child: _hostnameTestResult == null
                         ? const Text('Test')
                         : Text(_hostnameTestResult! ? 'Online' : 'Offline'),
@@ -179,17 +182,16 @@ class _HostPageState extends State<HostPage> {
                 ],
               ),
               const SizedBox(height: 10),
-              TextFormField(
+              puTextFormField(
+                context: context,
+                labelText: 'Display name',
                 initialValue: _displayName,
                 onSaved: (value) => _displayName = value?.trim() ?? '',
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Display name',
-                ),
               ),
               const SizedBox(height: 10),
               Consumer<Settings>(
-                builder: (_, settings, __) => TextFormField(
+                builder: (context, settings, __) => puTextFormField(
+                  context: context,
                   initialValue: _pingIntervalStr,
                   onSaved: (value) => _pingIntervalStr = value?.trim() ?? '',
                   validator: (value) {
@@ -201,13 +203,10 @@ class _HostPageState extends State<HostPage> {
                     }
                     return null;
                   },
+                  labelText: 'Custom ping interval (seconds)',
+                  hintText: settings.interval.toString(),
+                  hintStyle: const TextStyle(color: Colors.grey),
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    border: const UnderlineInputBorder(),
-                    labelText: 'Custom ping interval (seconds)',
-                    hintText: settings.interval.toString(),
-                    hintStyle: const TextStyle(color: Colors.grey),
-                  ),
                 ),
               ),
             ],

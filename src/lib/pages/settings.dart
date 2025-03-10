@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../models/settings.dart';
 import '../utils/non_empty_formatter.dart';
+import '../utils/pu_widgets.dart';
 
 class SettingsPage extends StatelessWidget {
   SettingsPage({super.key});
@@ -34,7 +35,7 @@ class SettingsPage extends StatelessWidget {
             const Text('Settings'),
             const Spacer(),
             IconButton(
-              icon: const Icon(Icons.info),
+              icon: const Icon(Icons.info_outline),
               onPressed: () => showDialog(
                 context: context,
                 builder: (context) => FutureBuilder(
@@ -64,66 +65,59 @@ class SettingsPage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         child: Column(
           children: [
-            TextField(
+            puTextField(
+              context: context,
+              labelText: 'Ping interval (seconds)',
               controller: _intervalTEC,
-              keyboardType: TextInputType.number,
+              onChanged: (_) => updateInterval(),
               inputFormatters: <TextInputFormatter>[
                 NonEmptyFormatter(),
                 FilteringTextInputFormatter.digitsOnly
               ],
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
-                labelText: 'Ping interval (seconds)',
-              ),
-              onChanged: (_) => updateInterval(),
+              keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 10),
-            DropdownButtonFormField(
+            puDropdownButtonFormField(
+              context: context,
               value: settings.themeMode,
-              items: [
-                DropdownMenuItem(
-                  value: ThemeMode.system,
-                  child: Text(
-                    'Use system theme',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: ThemeMode.light,
-                  child: Text(
-                    'Light theme',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: ThemeMode.dark,
-                  child: Text(
-                    'Dark theme',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
-              ],
+              labelText: 'Theme Mode',
               onChanged: (value) {
                 if (value != null) {
                   context.read<Settings>().themeMode = value;
                 }
               },
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
-                labelText: 'Theme Mode',
-              ),
+              items: [
+                const DropdownMenuItem(
+                  value: ThemeMode.system,
+                  child: PuText('Use system theme'),
+                ),
+                const DropdownMenuItem(
+                  value: ThemeMode.light,
+                  child: PuText('Light theme'),
+                ),
+                const DropdownMenuItem(
+                  value: ThemeMode.dark,
+                  child: PuText('Dark theme'),
+                ),
+              ],
             ),
             const SizedBox(height: 10),
-            CheckboxListTile(
-              controlAffinity: ListTileControlAffinity.leading,
-              contentPadding: EdgeInsets.zero,
+            PuLabeledCheckbox(
+              value: settings.customThemeColor != null,
+              onChanged: (value) {
+                settings.customThemeColor =
+                    value ?? false ? Colors.deepPurple : null;
+              },
               title: Row(
                 children: [
-                  const Text('Use custom theme color'),
+                  const PuText('Use custom theme color'),
                   const Spacer(),
                   RawMaterialButton(
-                    fillColor: settings.customThemeColor ?? Colors.grey,
+                    fillColor:
+                        settings.customThemeColor ?? Colors.grey.shade300,
                     shape: const CircleBorder(),
+                    constraints:
+                        const BoxConstraints(minWidth: 60.0, minHeight: 36.0),
                     onPressed: settings.customThemeColor == null
                         ? null
                         : () {
@@ -149,11 +143,6 @@ class SettingsPage extends StatelessWidget {
                   )
                 ],
               ),
-              value: settings.customThemeColor != null,
-              onChanged: (value) {
-                settings.customThemeColor =
-                    value ?? false ? Colors.deepPurple : null;
-              },
             ),
           ],
         ),

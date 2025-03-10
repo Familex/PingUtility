@@ -147,7 +147,7 @@ class _OverviewPageState extends State<OverviewPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Row(
           children: [
-            const Icon(Icons.search),
+            const Icon(Icons.search_outlined),
             Flexible(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
