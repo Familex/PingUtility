@@ -44,6 +44,12 @@
       adb start-server
     '';
 
+    generate-icons.exec = ''
+      pushd "$DEVENV_ROOT/src"
+        dart run flutter_launcher_icons
+      popd
+    '';
+
     # not tested
     fix-gradle.exec = ''
       tmp_proj_root=$(mktemp --directory)

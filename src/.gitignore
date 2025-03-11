@@ -3,6 +3,7 @@
 !.gitignore
 
 !/lib/
+!/assets/
 !LICENSE
 
 !.metadata
