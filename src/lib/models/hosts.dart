@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import '../services/database.dart';
 import 'settings.dart';
 
+const pingHistoryMax = 30;
+
 class Host {
   Host({
     required this.hostname,
@@ -21,14 +23,7 @@ class Host {
   List<Duration?> time = [];
   (Ping, StreamSubscription<PingData>)? ping;
   Queue<(Ping, StreamSubscription<PingData>)> oneTimePing = Queue.from([]);
-
-  get graphDataReversed =>
-      UnmodifiableListView(time.reversed.take(smallGraphElements));
 }
-
-const timeoutMs = 3000;
-const pingHistoryMax = 100;
-const smallGraphElements = 20;
 
 final class HostsModel extends ChangeNotifier {
   final Map<String, Host> _hosts = {};
@@ -40,8 +35,9 @@ final class HostsModel extends ChangeNotifier {
   UnmodifiableMapView<String, Host> get hosts =>
       UnmodifiableMapView(_initialLoading ? {} : _hosts);
   UnmodifiableListView<Duration?> getGraphDataReversed(String hostName) =>
-      UnmodifiableListView(
-          _initialLoading ? [] : _hosts[hostName]?.graphDataReversed ?? []);
+      UnmodifiableListView(_initialLoading
+          ? []
+          : _hosts[hostName]?.time.reversed.take(pingHistoryMax) ?? []);
 
   HostsModel() {
     unawaited(() async {
@@ -59,7 +55,8 @@ final class HostsModel extends ChangeNotifier {
     var interval = count != null ? 1 : host.pingInterval ?? settings.interval;
     if (interval <= 0) return null;
 
-    var ping = Ping(host.hostname, count: count, interval: interval);
+    var ping = Ping(host.hostname,
+        count: count, interval: interval, timeout: settings.pingTimeout);
     var subscription = ping.stream.listen((event) {
       // add to history
       if (event.response != null) {

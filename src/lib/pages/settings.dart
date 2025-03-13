@@ -7,24 +7,37 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/settings.dart';
-import '../utils/non_empty_formatter.dart';
 import '../utils/pu_widgets.dart';
 
-class SettingsPage extends StatelessWidget {
-  SettingsPage({super.key});
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
 
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
   // FIXME is it ok?
   final TextEditingController _intervalTEC = TextEditingController();
+  final TextEditingController _pingTimeoutTEC = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     var settings = context.watch<Settings>();
+    // FIXME is it ok?
     _intervalTEC.text = settings.interval.toString();
+    _pingTimeoutTEC.text = settings.pingTimeout.toString();
 
     void updateInterval() {
       var val = int.tryParse(_intervalTEC.text);
-      if (val == null) return;
+      if (val == null || val <= 0) return;
       settings.interval = val;
+    }
+
+    void updatePingTimeout() {
+      var val = int.tryParse(_pingTimeoutTEC.text);
+      if (val == null || val <= 0) return;
+      settings.pingTimeout = val;
     }
 
     return Scaffold(
@@ -71,7 +84,17 @@ class SettingsPage extends StatelessWidget {
               controller: _intervalTEC,
               onChanged: (_) => updateInterval(),
               inputFormatters: <TextInputFormatter>[
-                NonEmptyFormatter(),
+                FilteringTextInputFormatter.digitsOnly
+              ],
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 10),
+            puTextField(
+              context: context,
+              labelText: 'Ping timeout (seconds)',
+              controller: _pingTimeoutTEC,
+              onChanged: (_) => updatePingTimeout(),
+              inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.digitsOnly
               ],
               keyboardType: TextInputType.number,

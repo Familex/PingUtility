@@ -5,6 +5,11 @@ import 'package:sqflite/sqflite.dart';
 import '../models/hosts.dart';
 import '../models/settings.dart';
 
+int _defaultInterval = 2;
+int _defaultThemeMode = ThemeMode.system.index;
+int? _defaultCustomThemeColor;
+int _defaultPingTimeout = 3;
+
 class DatabaseService {
   // Singleton pattern
   static final DatabaseService _databaseService = DatabaseService._internal();
@@ -26,7 +31,7 @@ class DatabaseService {
       path,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
-      version: 3,
+      version: 4,
       onConfigure: (db) async => await db.execute('PRAGMA foreign_keys = ON'),
     );
   }
@@ -37,12 +42,14 @@ class DatabaseService {
         ( interval integer not null
         , theme_mode integer not null
         , custom_theme_color integer
+        , ping_timeout integer not null
         )
     ''');
     await db.insert('settings', {
-      'interval': 2,
-      'theme_mode': ThemeMode.system.index,
-      'custom_theme_color': null,
+      'interval': _defaultInterval,
+      'theme_mode': _defaultThemeMode,
+      'custom_theme_color': _defaultCustomThemeColor,
+      'ping_timeout': _defaultPingTimeout,
     });
 
     await db.execute('''
@@ -64,6 +71,14 @@ class DatabaseService {
     if (oldVersion < 3) {
       await db.execute('drop table settings');
       await db.execute('drop table hosts');
+      return await _onCreate(db, newVersion);
+    }
+
+    if (oldVersion < 4) {
+      await db.execute('''
+        alter table settings
+          add column ping_timeout integer not null default $_defaultPingTimeout
+      ''');
     }
   }
 
@@ -75,6 +90,7 @@ class DatabaseService {
       interval: settings.first['interval'] as int,
       themeMode: settings.first['theme_mode'] as int,
       customColor: customThemeColor == null ? null : Color(customThemeColor),
+      pingTimeout: settings.first['ping_timeout'] as int,
     );
   }
 
@@ -105,6 +121,11 @@ class DatabaseService {
   Future setCustomThemeColor(Color? customColor) async {
     var db = await _databaseService.database;
     await db.update('settings', {'custom_theme_color': customColor?.value});
+  }
+
+  Future setPingTimeout(int pingTimeout) async {
+    var db = await _databaseService.database;
+    await db.update('settings', {'ping_timeout': pingTimeout});
   }
 
   Future<bool> addHost(Host host) async {

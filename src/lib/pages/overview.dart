@@ -16,15 +16,18 @@ class HostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var data = context
+        .watch<HostsModel>()
+        .getGraphDataReversed(host.hostname)
+        .map((el) => el?.inMilliseconds.toDouble());
+
     var (min, avg, max) = () {
-      var data = host.graphDataReversed
-          .where((el) => el != null)
-          .map((el) => el!.inMilliseconds.toDouble());
       if (data.isEmpty) return (null, null, null);
       double total = 0.0;
       double min = double.infinity;
       double max = -double.infinity;
       for (var el in data) {
+        if (el == null) continue;
         if (el < min) min = el;
         if (el > max) max = el;
         total += el;
@@ -73,11 +76,10 @@ class HostCard extends StatelessWidget {
                     color: Theme.of(context).colorScheme.primary,
                     spots: () {
                       List<FlSpot> result = [];
-                      var ind = smallGraphElements;
-                      for (var val in host.graphDataReversed) {
+                      var ind = pingHistoryMax;
+                      for (var val in data) {
                         if (val == null) continue;
-                        result.add(FlSpot(
-                            (--ind).toDouble(), val.inMilliseconds.toDouble()));
+                        result.add(FlSpot((--ind).toDouble(), val));
                       }
                       return result;
                     }(),
