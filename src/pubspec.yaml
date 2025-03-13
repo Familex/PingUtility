@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.6.1
+version: 0.6.2
 
 environment:
   sdk: ^3.5.4
@@ -61,11 +61,10 @@ dev_dependencies:
   # XXX version 0.14.x crashes system UI (mipmap-anydpi-v26)
   flutter_launcher_icons: ^0.13.0
 
-# FIXME splash screen looks bad
 flutter_launcher_icons:
   image_path: "./assets/app_icon/default.png"
   adaptive_icon_background: "#70594C"
-  adaptive_icon_foregroud: "./assets/app_icon/default.png"
+  adaptive_icon_foreground: "./assets/app_icon/default.png"
   adaptive_icon_foreground_inset: 0
   adaptive_icon_monochrome: "./assets/app_icon/monochrome.png"
   android: true
