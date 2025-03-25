@@ -35,7 +35,11 @@ jobs:
       with:
         working-directory: ./src
         dry-run: false
+        build-type: 'apk'
         token: ${{ github.token }}
         app-version: ${{ github.ref_name }}
         tag: ${{ github.ref }}
-        build-type: 'apk'
+        android-keystore-file-base64: ${{ secrets.ANDROID_SIGNING_KEYSTORE }}
+        android-keystore-password: ${{ secrets.ANDROID_SIGNING_KEYSTORE_PASSWORD }}
+        android-key-alias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
+        android-key-password: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
